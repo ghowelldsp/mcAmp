@@ -501,3 +501,138 @@ void sru_config_sharc_sam_adau1452_master(void) {
     SRU2(DAI1_PB14_O, SPT4_BD0_I);        // route ADAU1452 SDATA Out pin to SPORT4B-D0 input
     SRU2(SPT4_AD0_O,  DAI1_PB13_I);        // route SPORT4A-D0 output to ADAU1452 SDATA In
 }
+
+/**
+ * @brief      Configuration: Merus Audio MA12040P is slave
+ *
+ * Basic setup for 2 channel audio being streamed to the the MA12040P. The SHARC acts
+ * as the master device and the MA12040P is the slave.
+ *
+ */
+void sru_config_multichannel_amps(void) {
+
+    // Initialize standard SRU/DAI settings on SHARC Audio Module board
+//    sru_init_sharc_sam();
+
+	/*
+	 * Initalise Amps
+	 *
+	 * Sets up the mute and enable lines for the amps and the I2C mux reset pins.
+	 * Mutes the amps, the enables them and the I2C mux.
+	 */
+
+	// set mute, enable and i2c mux reset pins as outputs
+	SRU2(HIGH, DAI1_PBEN14_I);	// enable
+	SRU(HIGH, DAI0_PBEN18_I);	// i2c mux reset
+
+    // disable the ma12040p amps
+	SRU2(HIGH, DAI1_PB14_I);
+
+    // enable the i2c mux
+    SRU(HIGH, DAI0_PB18_I);
+
+    /*
+	* Initalise PCG
+	*
+	* PCGC is setup to take in the CLK and FS signals from the ADAU1761 which input
+	* into the DAI0 domain pins and routed to DAI1 domain via CRS channels to the
+	* PCGC inputs. The input CLK and FS signals are sync'd and divided to output the
+	* appropriate I2S CLK and FS signal rates.
+	*/
+
+    // configure PCGB register for MA12040P SCL and FS output
+    *pREG_PCG0_SYNC2 = BITM_PCG_SYNC2_FSC |    		// enable external FS synchronisation
+                       BITM_PCG_SYNC2_CLKC |     	// enable external CLK synchronisation
+                       0;
+
+    *pREG_PCG0_CTLC1 = BITM_PCG_CTLC1_CLKSRC |      // clock source is from PCG0_EXTCLKB_I
+					   BITM_PCG_CTLC1_FSSRC |		// frame sync source is from PCG0_EXTCLKB_I
+					   4 |							// clock division
+					   (0x2 << BITP_PCG_CTLC1_FSPHASELO);
+
+	*pREG_PCG0_CTLC0 = BITM_PCG_CTLC0_CLKEN |		// enable clock
+					   BITM_PCG_CTLC0_FSEN |		// enable frame sync
+					   256; 						// frame sync division
+
+	// route ADAU1761 CLK and FS signals from DAI0 domain pins to PCGC inputs
+	SRU2(DAI1_CRS_PB03_O, PCG0_EXTCLKC_I);
+	SRU2(DAI1_CRS_PB04_O, PCG0_SYNC_CLKC_I);
+
+	/*
+	* Initalise SPORT clocks
+	*
+	*/
+
+	// route PCGC CLK and FS signals to SPORT4 CLK and FS inputs
+	SRU2(PCG0_CLKC_O, SPT4_ACLK_I);
+	SRU2(PCG0_FSC_O, SPT4_AFS_I);
+	SRU2(PCG0_CLKC_O, SPT4_BCLK_I);
+	SRU2(PCG0_FSC_O, SPT4_BFS_I);
+
+	// route PCGC CLK and FS signals to SPORT5 CLK and FS inputs
+	SRU2(PCG0_CLKC_O, SPT5_ACLK_I);
+	SRU2(PCG0_FSC_O, SPT5_AFS_I);
+	SRU2(PCG0_CLKC_O, SPT5_BCLK_I);
+	SRU2(PCG0_FSC_O, SPT5_BFS_I);
+
+	// route PCGC CLK and FS signals to SPORT6 CLK and FS inputs
+	SRU2(PCG0_CLKC_O, SPT6_ACLK_I);
+	SRU2(PCG0_FSC_O, SPT6_AFS_I);
+
+	/*
+	* Initalise Amp MCLK and I2S clocks
+	*
+	* Takes in the 12.288MHz external clock and routes it out as the Amp MCLK signal.
+	* Routes the PCG CLK and FS signals to the I2S CLK and WS ouputs.
+	*
+	*/
+
+	// set up 12.288MHz ext. oscillator as input and Amp MCLK as output
+	SRU(LOW, DAI0_PBEN06_I);	// 12.288 MHz Ext Clock
+	SRU(HIGH, DAI0_PBEN17_I);	// Amp MCLK
+
+	// route ext. osc. clock to Amp MCLK
+	SRU(DAI0_PB06_O,  DAI0_PB17_I);
+
+	// set I2S CLK and FS as outputs
+	SRU2(HIGH, DAI1_PBEN11_I);	// I2S CLK
+	SRU2(HIGH, DAI1_PBEN12_I);	// I2S WS
+
+    // route PCGC CLK and FS signals to I2S CLK and WS
+    SRU2(PCG0_CLKC_O, DAI1_PB11_I);		// I2S CLK
+    SRU2(PCG0_FSC_O, DAI1_PB12_I);  	// I2S WS
+
+    /*
+	* Initalise Amp SDA signals
+	*
+	*/
+
+    // set I2S SDA pins as outputs
+    SRU2(HIGH, DAI1_PBEN01_I);	// SDA0
+    SRU2(HIGH, DAI1_PBEN02_I);	// SDA1
+    SRU2(HIGH, DAI1_PBEN03_I);	// SDA2
+    SRU2(HIGH, DAI1_PBEN04_I);	// SDA3
+    SRU2(HIGH, DAI1_PBEN05_I);	// SDA4
+    SRU2(HIGH, DAI1_PBEN06_I);	// SDA5
+    SRU2(HIGH, DAI1_PBEN07_I);	// SDA6
+    SRU2(HIGH, DAI1_PBEN08_I);	// SDA7
+    SRU2(HIGH, DAI1_PBEN09_I);	// SDA8
+    SRU2(HIGH, DAI1_PBEN10_I);	// SDA9
+
+    // route SPORT4 data lines
+    SRU2(SPT4_AD0_O, DAI1_PB01_I);	// SDA0
+    SRU2(SPT4_AD1_O, DAI1_PB02_I);	// SDA1
+    SRU2(SPT4_BD0_O, DAI1_PB03_I);	// SDA2
+    SRU2(SPT4_BD1_O, DAI1_PB04_I);	// SDA3
+
+    // route SPORT5 data lines
+	SRU2(SPT5_AD0_O, DAI1_PB05_I);	// SDA4
+	SRU2(SPT5_AD1_O, DAI1_PB06_I);	// SDA5
+	SRU2(SPT5_BD0_O, DAI1_PB07_I);	// SDA6
+	SRU2(SPT5_BD1_O, DAI1_PB08_I);	// SDA7
+
+	// route SPORT5 data lines
+	SRU2(SPT6_AD0_O, DAI1_PB09_I);	// SDA8
+	SRU2(SPT6_AD1_O, DAI1_PB10_I);	// SDA9
+
+}

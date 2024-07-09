@@ -32,7 +32,8 @@ typedef enum _BM_TWI_RESULT
     TWI_SIMPLE_SUCCESS,                 // The API call is success
     TWI_SIMPLE_INVALID_DEVICE_NUM,      // Invalid peripheral
     TWI_SIMPLE_TIMEOUT,                 // Access timed out
-    TWI_SIMPLE_INVALID_SCLK0_FREQ       // Invalid valid for SCLK
+	TWI_SIMPLE_INVALID_SCLK0_FREQ,      // Invalid valid for SCLK
+	TWI_SIMPLE_ANAK_ERROR				// Address NAK
 } BM_TWI_RESULT;
 
 // Structure definition for TWI driver

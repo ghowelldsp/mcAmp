@@ -388,6 +388,8 @@ BM_TWI_RESULT twi_read(BM_TWI *device,
 
     *value = (*device->pREG_TWI_RXDATA8);
 
+    *device->pREG_TWI_FIFOCTL |= (1<<1);
+
     return TWI_SIMPLE_SUCCESS;
 }
 

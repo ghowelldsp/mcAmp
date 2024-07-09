@@ -53,6 +53,9 @@
 #include "../callback_midi_message.h"
 #include "../callback_pushbuttons.h"
 
+// multichannel amp
+#include "drivers/mcAmp_drivers/mcAmp.h"
+
 //*****************************************************************************
 // A2B Configuration
 //*****************************************************************************
@@ -364,6 +367,13 @@ void audioframework_initialize(void) {
     adau_write_ctrl_reg(&adau1761_local, ADAU1761_REG_REC_MIXER_RIGHT_1, currentRegVal);
 
     log_event(EVENT_INFO, "  ADAU1761 updated gain settings for the Audio Project Fin being used");
+
+	/*
+	 *  Initialise multichannel amplifier
+	 */
+    log_event(EVENT_INFO, "Configuring the Multichannel Amplifier");
+	sru_config_multichannel_amps();
+
     log_event(EVENT_INFO, "  Complete");
     // Set up SRU to bypass the processor and route I2S from A2B to the ADAU1761
     // In this config, the ADAU1761 will be initialized from a remote master node

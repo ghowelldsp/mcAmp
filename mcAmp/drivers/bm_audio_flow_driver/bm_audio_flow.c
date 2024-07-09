@@ -392,17 +392,19 @@ DMA_INIT_RESULT audioflow_init_sport_dma(SPORT_DMA_CONFIG *sport_dma_cfg) {
             *pREG_DMA11_YMOD = calculate_dma_ymod(sport_dma_cfg->dma_audio_rx_channels, sport_dma_cfg->dma_audio_block_size);
 
             *pREG_DMA10_CFG = DMA_TX_Config | (4 << BITP_DMA_CFG_FLOW);   //descriptor list mode = 4
-            *pREG_DMA11_CFG = DMA_RX_Config | (4 << BITP_DMA_CFG_FLOW);
+            *pREG_DMA11_CFG = DMA_TX_Config | (4 << BITP_DMA_CFG_FLOW);
 
             // Transmit
             *pREG_SPORT4_CTL_A  = sport_dma_cfg->pREG_SPORT_CTL_A;
             *pREG_SPORT4_MCTL_A = sport_dma_cfg->pREG_SPORT_MCTL_A;
             *pREG_SPORT4_CS0_A  = sport_dma_cfg->pREG_SPORT_CS0_A;
+            *pREG_SPORT4_DIV_A  = sport_dma_cfg->pREG_SPORT_DIV_A;
 
             // Receive
             *pREG_SPORT4_CTL_B  = sport_dma_cfg->pREG_SPORT_CTL_B;
             *pREG_SPORT4_MCTL_B = sport_dma_cfg->pREG_SPORT_MCTL_B;
             *pREG_SPORT4_CS0_B  = sport_dma_cfg->pREG_SPORT_CS0_B;
+            *pREG_SPORT4_DIV_B  = sport_dma_cfg->pREG_SPORT_DIV_B;
 
             if (sport_dma_cfg->generates_interrupts) {
                 // Set up interrupt handler for SPORT RX
@@ -439,17 +441,19 @@ DMA_INIT_RESULT audioflow_init_sport_dma(SPORT_DMA_CONFIG *sport_dma_cfg) {
             *pREG_DMA13_YMOD = calculate_dma_ymod(sport_dma_cfg->dma_audio_rx_channels, sport_dma_cfg->dma_audio_block_size);
 
             *pREG_DMA12_CFG = DMA_TX_Config | (4 << BITP_DMA_CFG_FLOW);   //descriptor list mode = 4
-            *pREG_DMA13_CFG = DMA_RX_Config | (4 << BITP_DMA_CFG_FLOW);
+            *pREG_DMA13_CFG = DMA_TX_Config | (4 << BITP_DMA_CFG_FLOW);
 
             // Transmit
             *pREG_SPORT5_CTL_A  = sport_dma_cfg->pREG_SPORT_CTL_A;
             *pREG_SPORT5_MCTL_A = sport_dma_cfg->pREG_SPORT_MCTL_A;
             *pREG_SPORT5_CS0_A  = sport_dma_cfg->pREG_SPORT_CS0_A;
+            *pREG_SPORT5_DIV_A  = sport_dma_cfg->pREG_SPORT_DIV_A;
 
             // Receive
             *pREG_SPORT5_CTL_B  = sport_dma_cfg->pREG_SPORT_CTL_B;
             *pREG_SPORT5_MCTL_B = sport_dma_cfg->pREG_SPORT_MCTL_B;
             *pREG_SPORT5_CS0_B  = sport_dma_cfg->pREG_SPORT_CS0_B;
+            *pREG_SPORT5_DIV_B  = sport_dma_cfg->pREG_SPORT_DIV_B;
 
             if (sport_dma_cfg->generates_interrupts) {
                 // Set up interrupt handler for SPORT RX
@@ -492,11 +496,13 @@ DMA_INIT_RESULT audioflow_init_sport_dma(SPORT_DMA_CONFIG *sport_dma_cfg) {
             *pREG_SPORT6_CTL_A  = sport_dma_cfg->pREG_SPORT_CTL_A;
             *pREG_SPORT6_MCTL_A = sport_dma_cfg->pREG_SPORT_MCTL_A;
             *pREG_SPORT6_CS0_A  = sport_dma_cfg->pREG_SPORT_CS0_A;
+            *pREG_SPORT6_DIV_A  = sport_dma_cfg->pREG_SPORT_DIV_A;
 
             // Receive
             *pREG_SPORT6_CTL_B  = sport_dma_cfg->pREG_SPORT_CTL_B;
             *pREG_SPORT6_MCTL_B = sport_dma_cfg->pREG_SPORT_MCTL_B;
             *pREG_SPORT6_CS0_B  = sport_dma_cfg->pREG_SPORT_CS0_B;
+            *pREG_SPORT6_DIV_B  = sport_dma_cfg->pREG_SPORT_DIV_B;
 
             if (sport_dma_cfg->generates_interrupts) {
                 // Set up interrupt handler for SPORT RX

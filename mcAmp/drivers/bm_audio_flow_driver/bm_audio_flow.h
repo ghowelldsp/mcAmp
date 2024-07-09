@@ -100,11 +100,13 @@ typedef struct
     uint32_t pREG_SPORT_CTL_A;
     uint32_t pREG_SPORT_MCTL_A;
     uint32_t pREG_SPORT_CS0_A;
+    uint32_t pREG_SPORT_DIV_A;
 
     // Init values for the SPORT TX control registers
     uint32_t pREG_SPORT_CTL_B;
     uint32_t pREG_SPORT_MCTL_B;
     uint32_t pREG_SPORT_CS0_B;
+    uint32_t pREG_SPORT_DIV_B;
 
     // Used to determine which ping pong buffer we should process
     volatile uint32_t *pREG_DMA_RX_DSCPTR_NXT;
