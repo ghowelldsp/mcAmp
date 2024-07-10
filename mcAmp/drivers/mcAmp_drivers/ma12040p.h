@@ -22,7 +22,7 @@ extern "C" {
 /*------------------- MACROS AND DEFINES -------------------------*/
 
 /* 
-	MA12040P I2C device addresses
+    MA12040P I2C device addresses
 */
 
 #define MA12040P_DEVADDR_1		((uint8_t)0x20)	// 7-bit device address
@@ -31,7 +31,7 @@ extern "C" {
 #define MA12040P_DEVADDR_4		((uint8_t)0x23)	// 7-bit device address
 
 /* 
-	power mode control registers
+    power mode control registers
 */
 
 //// power mode control
@@ -153,15 +153,15 @@ extern "C" {
 
 typedef enum
 {
-	MA12040P_AR_TIME_SLOW,
-	MA12040P_AR_TIME_NORMAL,
-	MA12040P_AR_TIME_FAST,
+    MA12040P_AR_TIME_SLOW,
+    MA12040P_AR_TIME_NORMAL,
+    MA12040P_AR_TIME_FAST,
 } ma12040p_arTimes_t;
 
 typedef enum
 {
-	MA12040P_VLA_DISABLE = 0U,
-	MA12040P_VLA_ENABLE = 1U,
+    MA12040P_VLA_DISABLE = 0U,
+    MA12040P_VLA_ENABLE = 1U,
 } ma12040p_vlaEnable_t;
 
 //// channel volumes db

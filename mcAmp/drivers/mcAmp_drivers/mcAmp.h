@@ -31,10 +31,10 @@ extern "C" {
 /*------------------------------------------- GLOBAL FUNCTION PROTOTYPES ---------------------------------------------*/
 
 void mcAmp_init(
-	void);
+    void);
 
 void mcAmp_enable(
-	void);
+    void);
 
 #ifdef __cplusplus
 }
