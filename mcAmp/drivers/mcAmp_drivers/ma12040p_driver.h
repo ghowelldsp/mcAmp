@@ -36,12 +36,18 @@ typedef enum
 MA12040P_RESULT ma12040p_writeReg(
 	BM_TWI *twi,
 	uint8_t regAddr,
-	uint8_t regValue);
+	uint8_t regValue,
+	uint8_t regBitMask,
+	uint8_t regBitPos);
 
 MA12040P_RESULT ma12040p_readReg(
 	BM_TWI *twi,
 	uint8_t regAddr,
 	uint8_t *regValue);
+
+MA12040P_RESULT ma12040p_setVolume(
+	BM_TWI *twi,
+	float volDb);
 
 #ifdef __cplusplus
 }

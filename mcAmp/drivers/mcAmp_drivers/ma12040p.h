@@ -113,22 +113,50 @@ extern "C" {
 //#define I2S_ORDER			2
 //#define I2S_WS_POL			1
 //#define I2S_SCK_POL			0
-//
-///*
-//	volume and limiter control registers
-//*/
-//
-//// attack and release time controls
-//#define VOL_LIM_AR			((uint8_t)0x35) // audio_proc_release, audio_proc_attack, audio_proc_enable
-//
-//// mute audio
-//#define VOL_MUTE_LIM_BY		((uint8_t)0x36) // audio_proc_mute, audio_proc_limiterEnable
 
-// master volume
-#define MA12040P_VOL_DB_MST_ADDR			((uint8_t)0x40) 	// vol_db_master address
-#define MA12040P_VOL_DB_MST_DVAL			((uint8_t)0x18) 	// vol_db_master default value
+/*
+ * VLA Control Registers and Settings
+ */
 
-#define MA12040P_VOL_LSB_MST				((uint8_t)0x41)		// vol_lsb_master
+// audio_proc_release
+#define MA12040P_AUDIO_PROC_RELEASE_ADDR			((uint8_t)0x35)		// address
+#define MA12040P_AUDIO_PROC_RELEASE_BMASK			((uint8_t)0x03) 	// bit mask
+#define MA12040P_AUDIO_PROC_RELEASE_BPOS			((uint8_t)0x06) 	// bit position
+
+// audio_proc_attack
+#define MA12040P_AUDIO_PROC_ATTACK_ADDR				(MA12040P_AUDIO_PROC_RELEASE_ADDR)	// address
+#define MA12040P_AUDIO_PROC_ATTACK_BMASK			((uint8_t)0x03) 	// bit mask
+#define MA12040P_AUDIO_PROC_ATTACK_BPOS				((uint8_t)0x04) 	// bit position
+
+// audio_proc_enable
+#define MA12040P_AUDIO_PROC_ENABLE_ADDR				(MA12040P_AUDIO_PROC_RELEASE_ADDR)	// address
+#define MA12040P_AUDIO_PROC_ENABLE_BMASK			((uint8_t)0x01) 	// bit mask
+#define MA12040P_AUDIO_PROC_ENABLE_BPOS				((uint8_t)0x03) 	// bit position
+
+#define MA12040P_VOL_MAX							(24.0F)
+#define MA12040P_VOL_MIN							(-144.0F)
+
+// vol_db_master
+#define MA12040P_VOL_DB_MASTER_ADDR					((uint8_t)0x40) 	// address
+#define MA12040P_VOL_DB_MASTER_BMASK				((uint8_t)0xFF) 	// bit mask
+#define MA12040P_VOL_DB_MASTER_BPOS					((uint8_t)0x00) 	// bit position
+#define MA12040P_VOL_DB_MASTER_DVAL					((uint8_t)0x18) 	// default value
+
+// vol_lsb_master
+#define MA12040P_VOL_LSB_MASTER_ADDR				((uint8_t)0x41)		// address
+#define MA12040P_VOL_LSB_MASTER_BMASK				((uint8_t)0x03) 	// bit mask
+#define MA12040P_VOL_LSB_MASTER_BPOS				((uint8_t)0x00) 	// bit position
+
+/*
+ * VLA Settings
+ */
+
+typedef enum
+{
+	MA12040P_AR_TIME_SLOW,
+	MA12040P_AR_TIME_NORMAL,
+	MA12040P_AR_TIME_FAST,
+} ma12040p_arTimes_t
 
 //// channel volumes db
 //#define VOL_DB_CH0			((uint8_t)0x42) // vol_db_ch0

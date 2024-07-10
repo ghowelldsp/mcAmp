@@ -35,7 +35,9 @@ typedef struct mcAmp_initParams_t
 {
 	char name[20];
 	uint8_t regAddr; 
-	uint8_t value;
+	uint8_t regValue;
+	uint8_t regBitMask,
+	uint8_t regBitPos
 } mcAmp_initParams_t;
 
 /*------------------------------------------- STATIC VARIABLES -------------------------------------------------------*/
@@ -50,7 +52,7 @@ BM_TWI mcAmpTwiH;
 uint16_t ma12040pDevMap;
 
 mcAmp_initParams_t initParams[MCAMP_N_INIT_PARAMS] = {
-	{"master volume", MA12040P_VOL_DB_MST_ADDR, MCAMP_INIT_VOLUME}
+	{"master volume", MA12040P_VOL_DB_MST_ADDR, MCAMP_INIT_VOLUME, MA12040P_VOL_DB_MST_BMASK, MA12040P_VOL_DB_MST_BPOS}
 };
 
 /*------------------------------------------- STATIC FUNCTION PROTOTYPES ---------------------------------------------*/
@@ -187,14 +189,16 @@ static void setInitValues(void)
 
 				for (k = 0; k < MCAMP_N_INIT_PARAMS; k++)
 				{
-					if (ma12040p_writeReg(&mcAmpTwiH, initParams[k].regAddr, initParams[k].value) != MA12040P_SUCCESS)
+					if (ma12040p_writeReg(&mcAmpTwiH, initParams[k].regAddr, initParams[k].regValue, 
+					   					  initParams[k].regBitMask, initParams[k].regBitPos) != MA12040P_SUCCESS)
 					{
-						sprintf(msg, "McAmp: error writing '%s' value 0x%x", initParams[k].name, initParams[k].value);
+						sprintf(msg, "McAmp: error writing '%s' value 0x%x", initParams[k].name, 
+							    initParams[k].regValue);
 						log_event(EVENT_WARN, msg);
 					}
 					else
 					{
-						sprintf(msg, "McAmp: written '%s' value 0x%x", initParams[k].name, initParams[k].value);
+						sprintf(msg, "McAmp: written '%s' value 0x%x", initParams[k].name, initParams[k].regValue);
 						log_event(EVENT_INFO, msg);
 					}
 				}
