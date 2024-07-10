@@ -11,6 +11,8 @@
 
 /*------------------------------------------- INCLUDES ---------------------------------------------------------------*/
 
+#include <math.h>
+
 #include "ma12040p_driver.h"
 
 /*------------------------------------------- EXTERN VARIABLES -------------------------------------------------------*/
@@ -41,7 +43,7 @@ MA12040P_RESULT ma12040p_setVolume(
 			(volDb < MA12040P_VOL_MIN) ? MA12040P_VOL_MIN : volDb;
 
 	// round volume to nearest 0.25dB level
-	volDb = round(volDb * 4U) / 4U;
+	volDb = floor(volDb * 4U) / 4U;
 
 	// get integer and fractional parts
 	volInt = (uint8_t)volDb;
@@ -58,12 +60,26 @@ MA12040P_RESULT ma12040p_setVolume(
 	regValFrac = (uint8_t)(volFrac * 4U);
 
 	// write values to registers
-	ret |= ma12040p_writeReg(twi, MA12040P_VOL_DB_MST_ADDR, regValInt, MA12040P_VOL_DB_MST_BMASK, 
-							 MA12040P_VOL_DB_MST_BPOS);
+	ret |= ma12040p_writeReg(twi, MA12040P_VOL_DB_MASTER_ADDR, regValInt, MA12040P_VOL_DB_MASTER_BMASK,
+							 MA12040P_VOL_DB_MASTER_BPOS);
 	ret |= ma12040p_writeReg(twi, MA12040P_VOL_LSB_MASTER_ADDR, regValFrac, MA12040P_VOL_LSB_MASTER_BMASK, 
-	 						 MA12040P_VOL_LSB_MASTER_BPOS);
+							 MA12040P_VOL_LSB_MASTER_BPOS);
 
 	return ret;
+}
+
+MA12040P_RESULT ma12040p_setVlaEnable(
+	BM_TWI *twi,
+	ma12040p_vlaEnable_t enDi)
+{
+	// check NULL pointers
+	if (NULL == twi)
+	{
+		return MA12040P_ERROR;
+	}
+
+	return ma12040p_writeReg(twi, MA12040P_AUDIO_PROC_ENABLE_ADDR, enDi, MA12040P_AUDIO_PROC_ENABLE_BMASK,
+							 MA12040P_AUDIO_PROC_ENABLE_BPOS);
 }
 
 MA12040P_RESULT ma12040p_writeReg(
@@ -74,7 +90,8 @@ MA12040P_RESULT ma12040p_writeReg(
 	uint8_t regBitPos)
 {
 	uint8_t rdData;
-	uint8_t wrData[2] = {regAddr, regValue};
+	uint8_t wrData[2] = {regAddr, 0U};
+	uint8_t *pWrVal = &wrData[1];
 
 	// check NULL pointers
 	if (NULL == twi)
@@ -83,13 +100,13 @@ MA12040P_RESULT ma12040p_writeReg(
 	}
 
 	// read the register addres
-	ma12040p_readReg(twi, regAddr, &rdData);
+	ma12040p_readReg(twi, regAddr, pWrVal);
 
 	// clear the bits
-	rdData &= ~(regBitMask << regBitPos);
+	*pWrVal &= ~(regBitMask << regBitPos);
 
 	// write the new data
-	rdData |= regValue << regBitPos;
+	*pWrVal |= regValue << regBitPos;
 
 	// write param data
 	if (twi_write_block_r(twi, wrData, 2U, false) != TWI_SIMPLE_SUCCESS)
@@ -104,7 +121,7 @@ MA12040P_RESULT ma12040p_writeReg(
 	}
 	else
 	{
-		if (rdData != regValue)
+		if (rdData != *pWrVal)
 		{
 			return MA12040P_ERROR;
 		}

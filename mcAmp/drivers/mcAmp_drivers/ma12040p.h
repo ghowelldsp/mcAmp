@@ -156,7 +156,13 @@ typedef enum
 	MA12040P_AR_TIME_SLOW,
 	MA12040P_AR_TIME_NORMAL,
 	MA12040P_AR_TIME_FAST,
-} ma12040p_arTimes_t
+} ma12040p_arTimes_t;
+
+typedef enum
+{
+	MA12040P_VLA_DISABLE = 0U,
+	MA12040P_VLA_ENABLE = 1U,
+} ma12040p_vlaEnable_t;
 
 //// channel volumes db
 //#define VOL_DB_CH0			((uint8_t)0x42) // vol_db_ch0

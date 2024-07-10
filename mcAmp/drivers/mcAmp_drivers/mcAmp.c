@@ -25,35 +25,37 @@
 #define MCAMP_N_BUSSES							(2U)
 #define MCAMP_N_AMPS_ON_BUS_MAX					(4U)
 
-// initialisation parameters
-#define MCAMP_N_INIT_PARAMS						(1U)
-#define MCAMP_INIT_VOLUME						(0x30U) // -24 dBFS
+#define MCAMP_I2C_MUX_DEV_ADDR					((uint8_t)0x70)
 
 /*------------------------------------------- PRIVATE TYPEDEFS -------------------------------------------------------*/
 
-typedef struct mcAmp_initParams_t
+typedef struct mcAmp_params_t
 {
-	char name[20];
-	uint8_t regAddr; 
-	uint8_t regValue;
-	uint8_t regBitMask,
-	uint8_t regBitPos
-} mcAmp_initParams_t;
+	float volumeDb;		/**< Master volume level [dB]. Should be a value between -144 and +24 dB. */
+} mcAmp_params_t;
+
+typedef struct mcAmp_ampsConn_t
+{
+	uint8_t i2cBusNo;
+	uint8_t devAddr;
+} mcAmp_ampsConn_t;
+
+typedef struct mcAmp_amps_t
+{
+	uint8_t nDevices;
+	mcAmp_ampsConn_t ampsConn[MCAMP_N_AMPS_MAX];
+} mcAmp_amps_t;
 
 /*------------------------------------------- STATIC VARIABLES -------------------------------------------------------*/
 /*------------------------------------------- GLOBAL VARIABLES -------------------------------------------------------*/
 
 BM_TWI mcAmpTwiH;
 
-// Used to tell which amps are connected, and to which i2c mux bus, by storing the corresponding bit value.
-// For example, if there are a maximum of 4 devices per bus, and 2 busses, and all devices are connected on both
-// busses, then the value will be 0xFF. However, if only the first two devices are connected on bus 1 and the last
-// two devices connected on bus 2, then the value will be 0xC3.
-uint16_t ma12040pDevMap;
-
-mcAmp_initParams_t initParams[MCAMP_N_INIT_PARAMS] = {
-	{"master volume", MA12040P_VOL_DB_MST_ADDR, MCAMP_INIT_VOLUME, MA12040P_VOL_DB_MST_BMASK, MA12040P_VOL_DB_MST_BPOS}
+mcAmp_params_t mcAmpConfig = {
+	.volumeDb = -24.0,
 };
+
+mcAmp_amps_t amps = {0};
 
 /*------------------------------------------- STATIC FUNCTION PROTOTYPES ---------------------------------------------*/
 
@@ -139,15 +141,17 @@ static void detectAmps(void)
 			twi_set_temporary_address(&mcAmpTwiH, MA12040P_DEVADDR_1 + j);
 
 			// read the value of the master volume register
-			if (ma12040p_readReg(&mcAmpTwiH, MA12040P_VOL_DB_MST_ADDR, &regVal) != MA12040P_SUCCESS)
+			if (ma12040p_readReg(&mcAmpTwiH, MA12040P_VOL_DB_MASTER_ADDR, &regVal) != MA12040P_SUCCESS)
 			{
 				log_event(EVENT_WARN, "McAmp: error reading register");
 			}
 
-			if (regVal == MA12040P_VOL_DB_MST_DVAL)
+			if (regVal == MA12040P_VOL_DB_MASTER_DVAL)
 			{
-				// add device to device map
-				ma12040pDevMap |= 1U << (j + i * MCAMP_N_AMPS_ON_BUS_MAX);
+				// add amp to config
+				amps.ampsConn[amps.nDevices].i2cBusNo = i;
+				amps.ampsConn[amps.nDevices].devAddr = MA12040P_DEVADDR_1 + j;
+				amps.nDevices++;
 
 				sprintf(msg, "McAmp: MA12040P amp found. I2C Mux Bus: %d; Device Address: 0x%.2x", i, MA12040P_DEVADDR_1 + j);
 				log_event(EVENT_INFO, msg);
@@ -165,48 +169,60 @@ static void detectAmps(void)
 
 	// reset the i2c mux bus to default (0)
 	setI2cMuxBus(0U);
-
-	if (ma12040pDevMap == 0U)
-	{
-		log_event(EVENT_WARN, "McAmp: No amps connected.");
-	}
 }
 
 static void setInitValues(void)
 {
-	uint32_t i, j, k;
-	char msg[128] = {0};
+	char msg[128];
+	uint8_t i;
+	MA12040P_RESULT ret = MA12040P_SUCCESS;
 
-	for (i = 0; i < MCAMP_N_BUSSES; i++)
+	for (i = 0U; i < amps.nDevices; i++)
 	{
-		setI2cMuxBus(i);
+		setI2cMuxBus(amps.ampsConn[i].i2cBusNo);
+		twi_set_temporary_address(&mcAmpTwiH, amps.ampsConn[i].devAddr);
 
-		for (j = 0; j < MCAMP_N_AMPS_ON_BUS_MAX; j++)
+		sprintf(msg, "McAmp: Bus %d, DevAddr 0x%x - initialising params", amps.ampsConn[i].i2cBusNo,
+				amps.ampsConn[i].devAddr);
+		log_event(EVENT_INFO, msg);
+
+		// master volume
+		if (MA12040P_SUCCESS == ma12040p_setVolume(&mcAmpTwiH, mcAmpConfig.volumeDb))
 		{
-			if (ma12040pDevMap & (1U << (j + i * MCAMP_N_AMPS_ON_BUS_MAX)))
-			{
-				twi_set_temporary_address(&mcAmpTwiH, MA12040P_DEVADDR_1 + j);
-
-				for (k = 0; k < MCAMP_N_INIT_PARAMS; k++)
-				{
-					if (ma12040p_writeReg(&mcAmpTwiH, initParams[k].regAddr, initParams[k].regValue, 
-					   					  initParams[k].regBitMask, initParams[k].regBitPos) != MA12040P_SUCCESS)
-					{
-						sprintf(msg, "McAmp: error writing '%s' value 0x%x", initParams[k].name, 
-							    initParams[k].regValue);
-						log_event(EVENT_WARN, msg);
-					}
-					else
-					{
-						sprintf(msg, "McAmp: written '%s' value 0x%x", initParams[k].name, initParams[k].regValue);
-						log_event(EVENT_INFO, msg);
-					}
-				}
-			}
+			sprintf(msg, "\t setup master volume level at %.2f dBFS", mcAmpConfig.volumeDb);
+			log_event(EVENT_INFO, msg);
+		}
+		else
+		{
+			sprintf(msg, "\t error setting up master volume level at %.2f dBFS", mcAmpConfig.volumeDb);
+			log_event(EVENT_WARN, msg);
 		}
 
 		twi_restore_address(&mcAmpTwiH);
 	}
+
+	for (i = 0U; i < amps.nDevices; i++)
+	{
+		setI2cMuxBus(amps.ampsConn[i].i2cBusNo);
+		twi_set_temporary_address(&mcAmpTwiH, amps.ampsConn[i].devAddr);
+
+		if (MA12040P_SUCCESS != ma12040p_setVlaEnable(&mcAmpTwiH, MA12040P_VLA_ENABLE))
+		{
+			ret = MA12040P_ERROR;
+			sprintf(msg, "McAmp: error enabling VLA's on bus %d, devAddr 0x%x", amps.ampsConn[i].i2cBusNo,
+					amps.ampsConn[i].devAddr);
+			log_event(EVENT_WARN, msg);
+		}
+
+		twi_restore_address(&mcAmpTwiH);
+	}
+	if (MA12040P_SUCCESS == ret)
+	{
+		log_event(EVENT_INFO, "McAmp: VLA's enabled on all devices");
+	}
+
+	// reset the i2c mux bus to default (0)
+	setI2cMuxBus(0U);
 }
 
 /*------------------------------------------- GLOBAL FUNCTIONS -------------------------------------------------------*/
@@ -221,8 +237,15 @@ void mcAmp_init(
 	// check any amps connected
 	detectAmps();
 
-	// set initial value
-	setInitValues();
+	if (amps.nDevices)
+	{
+		// set initial value
+		setInitValues();
+	}
+	else
+	{
+		log_event(EVENT_WARN, "McAmp: No amps connected. McAmp not setup!");
+	}
 }
 
 /* enable */
