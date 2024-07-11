@@ -21,15 +21,66 @@
 /*------------------------------------------- STATIC VARIABLES -------------------------------------------------------*/
 /*------------------------------------------- GLOBAL VARIABLES -------------------------------------------------------*/
 /*------------------------------------------- STATIC FUNCTION PROTOTYPES ---------------------------------------------*/
+
+static void calcLevel(
+    float levelDb,
+    uint8_t *pRegValInt,
+    uint8_t *pRegValFrac);
+
 /*------------------------------------------- STATIC FUNCTIONS -------------------------------------------------------*/
+
+// calculate register level values from the dBFS input value
+static void calcLevel(
+    float levelDb,
+    uint8_t *pRegValInt,
+    uint8_t *pRegValFrac)
+{
+    uint8_t levelInt, regValInt, regValFrac;
+    float levelFrac;
+
+    // check limits
+    levelDb = (levelDb > MA12040P_LEVEL_DB_MAX) ? MA12040P_LEVEL_DB_MAX : \
+              (levelDb < MA12040P_LEVEL_DB_MIN) ? MA12040P_LEVEL_DB_MIN : levelDb;
+
+    // round volume to nearest 0.25dB level (NOTE: using floor as the Sharc standard library does not include round)
+    levelDb = floor(levelDb * MA12040P_N_FRAC_DIVS) / MA12040P_N_FRAC_DIVS;
+
+    // get integer and fractional parts
+    levelInt = (uint8_t)levelDb;
+    levelFrac = (float)levelInt - levelDb;
+
+    // calc integer register value
+    *regValInt = (uint8_t)MA12040P_LEVEL_DB_MAX - levelInt;
+
+    // calculate fractional register value
+    if (levelFrac < 0.0F)
+    {
+        levelFrac += 1.0F;
+    }
+    *regValFrac = (uint8_t)(levelFrac * MA12040P_N_FRAC_DIVS);
+}
+
 /*------------------------------------------- GLOBAL FUNCTIONS -------------------------------------------------------*/
 
-MA12040P_RESULT ma12040p_setVolume(
+MA12040P_RESULT ma12040p_setMasterMute(
     BM_TWI *twi,
-    float volDb)
+    ma12040p_mute_t mute)
 {
-    uint8_t volInt, regValInt, regValFrac;
-    float volFrac;
+    // check NULL pointers
+    if (NULL == twi)
+    {
+        return MA12040P_ERROR;
+    }
+
+    return ma12040p_writeReg(twi, MA12040P_AUDIO_PROC_MUTE_ADDR, mute, MA12040P_AUDIO_PROC_MUTE_BMASK,
+                             MA12040P_AUDIO_PROC_MUTE_BPOS);
+}
+
+MA12040P_RESULT ma12040p_setMasterVolume(
+    BM_TWI *twi,
+    float volumeDb)
+{
+    uint8_t regValInt, regValFrac;
     MA12040P_RESULT ret = MA12040P_SUCCESS;
 
     // check NULL pointers
@@ -38,39 +89,94 @@ MA12040P_RESULT ma12040p_setVolume(
         return MA12040P_ERROR;
     }
 
-    // check limits
-    volDb = (volDb > MA12040P_VOL_MAX) ? MA12040P_VOL_MAX : \
-            (volDb < MA12040P_VOL_MIN) ? MA12040P_VOL_MIN : volDb;
+    // calculate levels
+    calcLevel(volumeDb, &regValInt, &regValFrac);
 
-    // round volume to nearest 0.25dB level
-    volDb = floor(volDb * 4U) / 4U;
-
-    // get integer and fractional parts
-    volInt = (uint8_t)volDb;
-    volFrac = (float)volInt - volDb;
-
-    // calc integer register value
-    regValInt = (uint8_t)MA12040P_VOL_MAX - volInt;
-
-    // calculate fractional register value
-    if (volFrac < 0.0F)
-    {
-        volFrac += 1.0F;
-    }
-    regValFrac = (uint8_t)(volFrac * 4U);
-
-    // write values to registers
+    // write integer value to device
     ret |= ma12040p_writeReg(twi, MA12040P_VOL_DB_MASTER_ADDR, regValInt, MA12040P_VOL_DB_MASTER_BMASK,
                              MA12040P_VOL_DB_MASTER_BPOS);
+
+    // write fractional value to device
     ret |= ma12040p_writeReg(twi, MA12040P_VOL_LSB_MASTER_ADDR, regValFrac, MA12040P_VOL_LSB_MASTER_BMASK, 
                              MA12040P_VOL_LSB_MASTER_BPOS);
 
     return ret;
 }
 
+MA12040P_RESULT ma12040p_setLimiterAttack(
+    BM_TWI *twi,
+    ma12040p_arTimes_t arTime)
+{
+    // check NULL pointers
+    if (NULL == twi)
+    {
+        return MA12040P_ERROR;
+    }
+
+    return ma12040p_writeReg(twi, MA12040P_AUDIO_PROC_ATTACK_ADDR, arTime, MA12040P_AUDIO_PROC_ATTACK_BMASK,
+                             MA12040P_AUDIO_PROC_ATTACK_BPOS);
+}
+
+MA12040P_RESULT ma12040p_setLimiterRelease(
+    BM_TWI *twi,
+    ma12040p_arTimes_t arTime)
+{
+    // check NULL pointers
+    if (NULL == twi)
+    {
+        return MA12040P_ERROR;
+    }
+
+    return ma12040p_writeReg(twi, MA12040P_AUDIO_PROC_RELEASE_ADDR, arTime, MA12040P_AUDIO_PROC_RELEASE_BMASK,
+                             MA12040P_AUDIO_PROC_RELEASE_BPOS);
+}
+
+MA12040P_RESULT ma12040p_setLimiterThreshold(
+    BM_TWI *twi,
+    ma12040p_channels_t channel,
+    float thresholdDb)
+{
+    uint8_t regValInt, regValFrac;
+    uint8_t regAddr, bitMask, bitPos;
+    MA12040P_RESULT ret = MA12040P_SUCCESS;
+
+    // check NULL pointers
+    if (NULL == twi)
+    {
+        return MA12040P_ERROR;
+    }
+
+    // calculate levels
+    calcLevel(volumeDb, &regValInt, &regValFrac);
+
+    // write integer value to device
+    ret |= ma12040p_writeReg(twi, MA12040P_THR_DB_CH0_ADDR + channel, regValInt, MA12040P_THR_DB_CH0_BMASK,
+                             MA12040P_THR_DB_CH0_BPOS);
+
+    // write fractional value to device
+    ret |= ma12040p_writeReg(twi, MA12040P_THR_LSB_CH0_ADDR, regValFrac, MA12040P_THR_LSB_CH0_BMASK, 
+                             MA12040P_THR_LSB_CH0_BPOS + (channel * 0x2U));
+
+    return ret;
+}
+
+MA12040P_RESULT ma12040p_setLimiterEnable(
+    BM_TWI *twi,
+    ma12040p_enable_t enDi)
+{
+    // check NULL pointers
+    if (NULL == twi)
+    {
+        return MA12040P_ERROR;
+    }
+
+    return ma12040p_writeReg(twi, MA12040P_AUDIO_PROC_LIMITER_ENABLE_ADDR, enDi, 
+                             MA12040P_AUDIO_PROC_LIMITER_ENABLE_BMASK, MA12040P_AUDIO_PROC_LIMITER_ENABLE_BPOS);
+}
+
 MA12040P_RESULT ma12040p_setVlaEnable(
     BM_TWI *twi,
-    ma12040p_vlaEnable_t enDi)
+    ma12040p_enable_t enDi)
 {
     // check NULL pointers
     if (NULL == twi)

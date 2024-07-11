@@ -31,7 +31,12 @@
 
 typedef struct mcAmp_params_t
 {
-    float volumeDb;     /**< Master volume level [dB]. Should be a value between -144 and +24 dB. */
+    float volumeDb;                             /**< Master volume level [dBFS]. Should be a value between -144 and +24 
+                                                     dBFS. */
+    ma12040p_arTimes_t limiterAttackTime;       /**< Limiter attack time. */
+    ma12040p_arTimes_t limiterReleaseTime;      /**< Limiter release time. */
+    float limiterThresholdDb;                   /**< Limiter threshold [dBFS]. Should be a value between -144 and +24 
+                                                     dBFS.*/
 } mcAmp_params_t;
 
 typedef struct mcAmp_ampsConn_t
@@ -53,6 +58,9 @@ BM_TWI mcAmpTwiH;
 
 mcAmp_params_t mcAmpConfig = {
     .volumeDb = -24.0,
+    .limiterAttackTime = MA12040P_AR_TIME_FAST;
+    .limiterReleaseTime = MA12040P_AR_TIME_NORMAL;
+    .limiterThresholdDb = -24.0
 };
 
 mcAmp_amps_t amps = {0};
@@ -187,7 +195,7 @@ static void setInitValues(void)
         log_event(EVENT_INFO, msg);
 
         // master volume
-        if (MA12040P_SUCCESS == ma12040p_setVolume(&mcAmpTwiH, mcAmpConfig.volumeDb))
+        if (MA12040P_SUCCESS == ma12040p_setMasterVolume(&mcAmpTwiH, mcAmpConfig.volumeDb))
         {
             sprintf(msg, "\t setup master volume level at %.2f dBFS", mcAmpConfig.volumeDb);
             log_event(EVENT_INFO, msg);
@@ -198,15 +206,86 @@ static void setInitValues(void)
             log_event(EVENT_WARN, msg);
         }
 
+        // limiter attack time
+        if (MA12040P_SUCCESS == ma12040p_setLimiterAttack(&mcAmpTwiH, mcAmpConfig.limiterAttackTime))
+        {
+            if (MA12040P_AR_TIME_SLOW == mcAmpConfig.limiterAttackTime)
+            {
+                log_event(EVENT_INFO, "\t setup limiter attack time to SLOW");
+            }
+            else if (MA12040P_AR_TIME_NORMAL == mcAmpConfig.limiterAttackTime)
+            {
+                log_event(EVENT_INFO, "\t setup limiter attack time to NORMAL");
+            }
+            else if (MA12040P_AR_TIME_FAST == mcAmpConfig.limiterAttackTime)
+            {
+                log_event(EVENT_INFO, "\t setup limiter attack time to FAST");
+            }
+        }
+        else
+        {
+            log_event(EVENT_INFO, "\t error setting limiter attack time");
+        }
+
+        // limiter release time
+        if (MA12040P_SUCCESS == ma12040p_setLimiterRelease(&mcAmpTwiH, mcAmpConfig.limiterReleaseTime))
+        {
+            if (MA12040P_AR_TIME_SLOW == mcAmpConfig.limiterReleaseTime)
+            {
+                log_event(EVENT_INFO, "\t setup limiter release time to SLOW");
+            }
+            else if (MA12040P_AR_TIME_NORMAL == mcAmpConfig.limiterReleaseTime)
+            {
+                log_event(EVENT_INFO, "\t setup limiter release time to NORMAL");
+            }
+            else if (MA12040P_AR_TIME_FAST == mcAmpConfig.limiterReleaseTime)
+            {
+                log_event(EVENT_INFO, "\t setup limiter release time to FAST");
+            }
+        }
+        else
+        {
+            log_event(EVENT_INFO, "\t error setting limiter release time");
+        }
+
+        // limiter thresholds for each channel
+        ret = MA12040P_SUCCESS
+        for (i = 0; i < MA12040P_N_CHANNELS_MAX; i++)
+        {
+            ret != ma12040p_setLimiterThreshold(&mcAmpTwiH, MA12040P_CHANNEL_0 + i, mcAmpConfig.limiterThresholdDb)
+
+            if (MA12040P_SUCCESS == ret)
+            {
+                sprintf(msg, "\t setup limiter threshold level at %.2f dBFS", mcAmpConfig.limiterThresholdDb);
+                log_event(EVENT_INFO, msg);
+            }
+            else
+            {
+                sprintf(msg, "\t error setting limiter threshold level at %.2f dBFS", mcAmpConfig.limiterThresholdDb);
+                log_event(EVENT_INFO, msg);
+            }
+        }
+
+        // enable limiters
+        if (MA12040P_SUCCESS == ma12040p_setLimiterEnable(&mcAmpTwiH, MA12040P_ENABLE))
+        {
+            log_event(EVENT_INFO, "\t enabled limiter");
+        }
+        else
+        {
+            log_event(EVENT_INFO, "\t error enabling limiter");
+        }
+
         twi_restore_address(&mcAmpTwiH);
     }
 
+    // enable the VLA's across all channels
     for (i = 0U; i < amps.nDevices; i++)
     {
         setI2cMuxBus(amps.ampsConn[i].i2cBusNo);
         twi_set_temporary_address(&mcAmpTwiH, amps.ampsConn[i].devAddr);
 
-        if (MA12040P_SUCCESS != ma12040p_setVlaEnable(&mcAmpTwiH, MA12040P_VLA_ENABLE))
+        if (MA12040P_SUCCESS != ma12040p_setVlaEnable(&mcAmpTwiH, MA12040P_ENABLE))
         {
             ret = MA12040P_ERROR;
             sprintf(msg, "McAmp: error enabling VLA's on bus %d, devAddr 0x%x", amps.ampsConn[i].i2cBusNo,
@@ -221,7 +300,7 @@ static void setInitValues(void)
         log_event(EVENT_INFO, "McAmp: VLA's enabled on all devices");
     }
 
-    // reset the i2c mux bus to default (0)
+    // reset the i2c mux bus to default
     setI2cMuxBus(0U);
 }
 

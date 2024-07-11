@@ -33,13 +33,34 @@ typedef enum
 /*------------------------------------------- EXPORTED VARIABLES -----------------------------------------------------*/
 /*------------------------------------------- GLOBAL FUNCTION PROTOTYPES ---------------------------------------------*/
 
-MA12040P_RESULT ma12040p_setVolume(
+MA12040P_RESULT ma12040p_setMasterMute(
     BM_TWI *twi,
-    float volDb);
+    ma12040p_mute_t mute);
+
+MA12040P_RESULT ma12040p_setMasterVolume(
+    BM_TWI *twi,
+    float volumeDb);
+
+MA12040P_RESULT ma12040p_setLimiterAttack(
+    BM_TWI *twi,
+    ma12040p_arTimes_t arTime);
+
+MA12040P_RESULT ma12040p_setLimiterRelease(
+    BM_TWI *twi,
+    ma12040p_arTimes_t arTime);
+
+MA12040P_RESULT ma12040p_setLimiterThreshold(
+    BM_TWI *twi,
+    ma12040p_channels_t channel,
+    float thresholdDb);
+
+MA12040P_RESULT ma12040p_setLimiterEnable(
+    BM_TWI *twi,
+    ma12040p_enable_t enDi)
 
 MA12040P_RESULT ma12040p_setVlaEnable(
     BM_TWI *twi,
-    ma12040p_vlaEnable_t enDi);
+    ma12040p_enable_t enDi);
 
 MA12040P_RESULT ma12040p_writeReg(
     BM_TWI *twi,
