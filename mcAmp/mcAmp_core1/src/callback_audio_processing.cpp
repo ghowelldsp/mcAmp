@@ -256,35 +256,27 @@ void processaudio_callback(void) {
 		audiochannel_0_left_out[i] = audiochannel_spdif_0_left_in[i];
 		audiochannel_0_right_out[i] = audiochannel_spdif_0_right_in[i];
 
-		mcamp_ch0[i] = audiochannel_spdif_0_left_in[i];
+		// mcamp outputs
 		mcamp_ch1[i] = audiochannel_spdif_0_right_in[i];
-
 		mcamp_ch2[i] = audiochannel_spdif_0_left_in[i];
 		mcamp_ch3[i] = audiochannel_spdif_0_right_in[i];
-
 		mcamp_ch4[i] = audiochannel_spdif_0_left_in[i];
 		mcamp_ch5[i] = audiochannel_spdif_0_right_in[i];
-
 		mcamp_ch6[i] = audiochannel_spdif_0_left_in[i];
 		mcamp_ch7[i] = audiochannel_spdif_0_right_in[i];
-
 		mcamp_ch8[i] = audiochannel_spdif_0_left_in[i];
 		mcamp_ch9[i] = audiochannel_spdif_0_right_in[i];
-
 		mcamp_ch10[i] = audiochannel_spdif_0_left_in[i];
 		mcamp_ch11[i] = audiochannel_spdif_0_right_in[i];
-
 		mcamp_ch12[i] = audiochannel_spdif_0_left_in[i];
 		mcamp_ch13[i] = audiochannel_spdif_0_right_in[i];
-
 		mcamp_ch14[i] = audiochannel_spdif_0_left_in[i];
 		mcamp_ch15[i] = audiochannel_spdif_0_right_in[i];
-
 		mcamp_ch16[i] = audiochannel_spdif_0_left_in[i];
 		mcamp_ch17[i] = audiochannel_spdif_0_right_in[i];
-
 		mcamp_ch18[i] = audiochannel_spdif_0_left_in[i];
 		mcamp_ch19[i] = audiochannel_spdif_0_right_in[i];
+		mcamp_ch20[i] = audiochannel_spdif_0_left_in[i];
 
 		/* Below are some additional examples of how to receive audio from the various input buffers
 

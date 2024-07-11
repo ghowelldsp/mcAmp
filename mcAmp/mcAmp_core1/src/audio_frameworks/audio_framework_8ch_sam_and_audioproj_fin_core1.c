@@ -94,30 +94,30 @@ float mcamp_ch12_to_ch15_out[MCAMP_HALF_SPORT_AUDIO_CHANNEL * AUDIO_BLOCK_SIZE] 
 float mcamp_ch16_to_ch19_out[MCAMP_HALF_SPORT_AUDIO_CHANNEL * AUDIO_BLOCK_SIZE] = {0};
 
 // Deinterleaved channel output buffers
-float *mcamp_ch0 = mcamp_ch0_to_ch3_out + AUDIO_BLOCK_SIZE * 0;
-float *mcamp_ch1 = mcamp_ch0_to_ch3_out + AUDIO_BLOCK_SIZE * 2;
-float *mcamp_ch2 = mcamp_ch0_to_ch3_out + AUDIO_BLOCK_SIZE * 1;
-float *mcamp_ch3 = mcamp_ch0_to_ch3_out + AUDIO_BLOCK_SIZE * 3;
+float *mcamp_ch1 = mcamp_ch0_to_ch3_out + AUDIO_BLOCK_SIZE * 3U;
+float *mcamp_ch2 = mcamp_ch0_to_ch3_out + AUDIO_BLOCK_SIZE * 1U;
+float *mcamp_ch3 = mcamp_ch0_to_ch3_out + AUDIO_BLOCK_SIZE * 0U;
+float *mcamp_ch4 = mcamp_ch0_to_ch3_out + AUDIO_BLOCK_SIZE * 2U;
 
-float *mcamp_ch4 = mcamp_ch4_to_ch7_out + AUDIO_BLOCK_SIZE * 0;
-float *mcamp_ch5 = mcamp_ch4_to_ch7_out + AUDIO_BLOCK_SIZE * 2;
-float *mcamp_ch6 = mcamp_ch4_to_ch7_out + AUDIO_BLOCK_SIZE * 1;
-float *mcamp_ch7 = mcamp_ch4_to_ch7_out + AUDIO_BLOCK_SIZE * 3;
+float *mcamp_ch5 = mcamp_ch4_to_ch7_out + AUDIO_BLOCK_SIZE * 3U;
+float *mcamp_ch6 = mcamp_ch4_to_ch7_out + AUDIO_BLOCK_SIZE * 1U;
+float *mcamp_ch7 = mcamp_ch4_to_ch7_out + AUDIO_BLOCK_SIZE * 0U;
+float *mcamp_ch8 = mcamp_ch4_to_ch7_out + AUDIO_BLOCK_SIZE * 2U;
 
-float *mcamp_ch8 = mcamp_ch8_to_ch11_out + AUDIO_BLOCK_SIZE * 0;
-float *mcamp_ch9 = mcamp_ch8_to_ch11_out + AUDIO_BLOCK_SIZE * 2;
-float *mcamp_ch10 = mcamp_ch8_to_ch11_out + AUDIO_BLOCK_SIZE * 1;
-float *mcamp_ch11 = mcamp_ch8_to_ch11_out + AUDIO_BLOCK_SIZE * 3;
+float *mcamp_ch9 = mcamp_ch8_to_ch11_out + AUDIO_BLOCK_SIZE * 3U;
+float *mcamp_ch10 = mcamp_ch8_to_ch11_out + AUDIO_BLOCK_SIZE * 1U;
+float *mcamp_ch11 = mcamp_ch8_to_ch11_out + AUDIO_BLOCK_SIZE * 0U;
+float *mcamp_ch12 = mcamp_ch8_to_ch11_out + AUDIO_BLOCK_SIZE * 2U;
 
-float *mcamp_ch12 = mcamp_ch12_to_ch15_out + AUDIO_BLOCK_SIZE * 0;
-float *mcamp_ch13 = mcamp_ch12_to_ch15_out + AUDIO_BLOCK_SIZE * 2;
-float *mcamp_ch14 = mcamp_ch12_to_ch15_out + AUDIO_BLOCK_SIZE * 1;
-float *mcamp_ch15 = mcamp_ch12_to_ch15_out + AUDIO_BLOCK_SIZE * 3;
+float *mcamp_ch13 = mcamp_ch12_to_ch15_out + AUDIO_BLOCK_SIZE * 3U;
+float *mcamp_ch14 = mcamp_ch12_to_ch15_out + AUDIO_BLOCK_SIZE * 1U;
+float *mcamp_ch15 = mcamp_ch12_to_ch15_out + AUDIO_BLOCK_SIZE * 0U;
+float *mcamp_ch16 = mcamp_ch12_to_ch15_out + AUDIO_BLOCK_SIZE * 2U;
 
-float *mcamp_ch16 = mcamp_ch16_to_ch19_out + AUDIO_BLOCK_SIZE * 0;
-float *mcamp_ch17 = mcamp_ch16_to_ch19_out + AUDIO_BLOCK_SIZE * 2;
-float *mcamp_ch18 = mcamp_ch16_to_ch19_out + AUDIO_BLOCK_SIZE * 1;
-float *mcamp_ch19 = mcamp_ch16_to_ch19_out + AUDIO_BLOCK_SIZE * 3;
+float *mcamp_ch17 = mcamp_ch16_to_ch19_out + AUDIO_BLOCK_SIZE * 3U;
+float *mcamp_ch18 = mcamp_ch16_to_ch19_out + AUDIO_BLOCK_SIZE * 1U;
+float *mcamp_ch19 = mcamp_ch16_to_ch19_out + AUDIO_BLOCK_SIZE * 0U;
+float *mcamp_ch20 = mcamp_ch16_to_ch19_out + AUDIO_BLOCK_SIZE * 2U;
 
 #pragma alignment_region(64)
 

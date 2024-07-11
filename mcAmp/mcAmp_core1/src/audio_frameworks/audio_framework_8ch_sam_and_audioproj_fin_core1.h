@@ -121,7 +121,6 @@ extern float *audiochannel_spdif_0_left_out;
 extern float *audiochannel_spdif_0_right_out;
 
 // Multichannel Amp Outputs
-extern float *mcamp_ch0;
 extern float *mcamp_ch1;
 extern float *mcamp_ch2;
 extern float *mcamp_ch3;
@@ -141,6 +140,7 @@ extern float *mcamp_ch16;
 extern float *mcamp_ch17;
 extern float *mcamp_ch18;
 extern float *mcamp_ch19;
+extern float *mcamp_ch20;
 
 #if (USE_BOTH_CORES_TO_PROCESS_AUDIO)
 
