@@ -22,16 +22,16 @@
 /*------------------------------------------- EXTERN VARIABLES -------------------------------------------------------*/
 /*------------------------------------------- PRIVATE MACROS AND DEFINES ---------------------------------------------*/
 
-#define MCAMP_N_BUSSES							(2U)
-#define MCAMP_N_AMPS_ON_BUS_MAX					(4U)
+#define MCAMP_N_BUSSES                          (2U)
+#define MCAMP_N_AMPS_ON_BUS_MAX                 (4U)
 
-#define MCAMP_I2C_MUX_DEV_ADDR					((uint8_t)0x70)
+#define MCAMP_I2C_MUX_DEV_ADDR                  ((uint8_t)0x70)
 
 /*------------------------------------------- PRIVATE TYPEDEFS -------------------------------------------------------*/
 
 typedef struct mcAmp_params_t
 {
-    float volumeDb;		/**< Master volume level [dB]. Should be a value between -144 and +24 dB. */
+    float volumeDb;     /**< Master volume level [dB]. Should be a value between -144 and +24 dB. */
 } mcAmp_params_t;
 
 typedef struct mcAmp_ampsConn_t
