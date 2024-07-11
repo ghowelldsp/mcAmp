@@ -115,7 +115,7 @@ extern "C" {
  * VLA Settings
  */
 
-#define MA12040P_N_CHANNELS_MAX                     (4U)
+#define MA12040P_N_CHANNELS_PER_AMP               	(4U)
 
 #define MA12040P_LEVEL_DB_MAX                       (24.0F)
 #define MA12040P_LEVEL_DB_MIN                       (-144.0F)

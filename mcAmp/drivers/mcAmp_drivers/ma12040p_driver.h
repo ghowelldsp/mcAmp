@@ -56,7 +56,7 @@ MA12040P_RESULT ma12040p_setLimiterThreshold(
 
 MA12040P_RESULT ma12040p_setLimiterEnable(
     BM_TWI *twi,
-    ma12040p_enable_t enDi)
+    ma12040p_enable_t enDi);
 
 MA12040P_RESULT ma12040p_setVlaEnable(
     BM_TWI *twi,

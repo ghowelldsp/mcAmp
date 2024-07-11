@@ -35,7 +35,7 @@ static void calcLevel(
     uint8_t *pRegValInt,
     uint8_t *pRegValFrac)
 {
-    uint8_t levelInt, regValInt, regValFrac;
+    uint8_t levelInt;
     float levelFrac;
 
     // check limits
@@ -50,14 +50,14 @@ static void calcLevel(
     levelFrac = (float)levelInt - levelDb;
 
     // calc integer register value
-    *regValInt = (uint8_t)MA12040P_LEVEL_DB_MAX - levelInt;
+    *pRegValInt = (uint8_t)MA12040P_LEVEL_DB_MAX - levelInt;
 
     // calculate fractional register value
     if (levelFrac < 0.0F)
     {
         levelFrac += 1.0F;
     }
-    *regValFrac = (uint8_t)(levelFrac * MA12040P_N_FRAC_DIVS);
+    *pRegValFrac = (uint8_t)(levelFrac * MA12040P_N_FRAC_DIVS);
 }
 
 /*------------------------------------------- GLOBAL FUNCTIONS -------------------------------------------------------*/
@@ -137,7 +137,6 @@ MA12040P_RESULT ma12040p_setLimiterThreshold(
     float thresholdDb)
 {
     uint8_t regValInt, regValFrac;
-    uint8_t regAddr, bitMask, bitPos;
     MA12040P_RESULT ret = MA12040P_SUCCESS;
 
     // check NULL pointers
@@ -147,7 +146,7 @@ MA12040P_RESULT ma12040p_setLimiterThreshold(
     }
 
     // calculate levels
-    calcLevel(volumeDb, &regValInt, &regValFrac);
+    calcLevel(thresholdDb, &regValInt, &regValFrac);
 
     // write integer value to device
     ret |= ma12040p_writeReg(twi, MA12040P_THR_DB_CH0_ADDR + channel, regValInt, MA12040P_THR_DB_CH0_BMASK,
